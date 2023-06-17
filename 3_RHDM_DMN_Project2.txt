@@ -1,0 +1,111 @@
+Sample decision service(DMN)
+============================
+1) Login Decision Central: http://localhost:8080/decision-central
+2) 	Add project: dmn-decision-service
+	Add asset DMN--> insurance-premium select package --> OK
+	Drag and Drop : 1 DMN Decision, 2 DMN Input data.
+					Join Input data to DMN Decision.
+	Select DMN Input data--> Properties : name=Age, Data Type=number
+	Select DMN Input data--> Properties : name=hasPrevInsurance, Data Type=boolean
+	Select DMN Decision--> Properties : name=Insurance Premium, Data type=number
+	
+	select DMN Decision(Insurance Premium)--> Edit--> select Decision Table-->
+		add som rows
+		
+	Validate --> Save --> Build-->Deploy
+
+3) Deploy DMN project on the Execution Server
+			Menu --> Deploy--> check the deployment unit name: dmn-decision-service_1.0.0-SNAPSHOT
+			Open API swagger page: http://localhost:8080/kie-server/docs/
+			Under DMN Modles--> GET /server/containers/{containerId}/dmn
+			Try it out--> containerId=dmn-decision-service_1.0.0-SNAPSHOT
+			Response application/json
+			Execute
+			Provide credentials kieserver/kieserver1! (if it prompt)
+			200
+				
+			Response body
+			{
+			"type": "SUCCESS",
+			"msg": "OK models successfully retrieved from container 'dmn-decision-service_1.0.0-SNAPSHOT'",
+			"result": {
+				"dmn-model-info-list": {
+				"models": [
+					{
+					"model-namespace": "https://kiegroup.org/dmn/_279EFC1A-FF7A-42C5-986D-C913050A1B69",
+					"model-name": "insurance-premium",
+					"model-id": "_E12E9B9C-1721-4220-945A-A4688C3F4EA5",
+					"decisions": [
+						{
+						"decision-id": "_74A37BBE-F995-42C0-842C-6AC0CE4A4FF4",
+						"decision-name": "Insurance Premium"
+						}
+					],
+					"inputs": [
+						{
+						"inputdata-id": "_103D587E-45BD-457E-AC38-BD1CEF8BF479",
+						"inputdata-name": "hasPrevInsurance",
+						"inputdata-typeRef": {
+							"namespace-uri": "https://kiegroup.org/dmn/_279EFC1A-FF7A-42C5-986D-C913050A1B69",
+							"local-part": "boolean",
+							"prefix": ""
+						}
+						},
+						{
+						"inputdata-id": "_021E337D-510E-4677-80EB-41D0D168D63C",
+						"inputdata-name": "Age",
+						"inputdata-typeRef": {
+							"namespace-uri": "https://kiegroup.org/dmn/_279EFC1A-FF7A-42C5-986D-C913050A1B69",
+							"local-part": "number",
+							"prefix": ""
+						}
+						}
+					],
+					"itemDefinitions": [],
+					"decisionServices": []
+					}
+				]
+				}
+			}
+			}
+4) Interacting with the deployed DMN model using REST.
+	Under DMN Modles--> POST /server/containers/{containerId}/dmn
+	Try it out--> containerId=dmn-decision-service_1.0.0-SNAPSHOT
+	Request & Response context-Type=application/json
+	Request Body: 
+			{
+				"model-namespace": "https://kiegroup.org/dmn/_279EFC1A-FF7A-42C5-986D-C913050A1B69",
+				"model-name": "insurance-premium",
+				"decision-id": null,
+				"decision-name": null,
+				"dmn-context": {"Age": 18, "hasPrevInsurance": true}
+			}
+	Response:
+		{
+		"type": "SUCCESS",
+		"msg": "OK from container 'dmn-decision-service_1.0.0-SNAPSHOT'",
+		"result": {
+			"dmn-evaluation-result": {
+			"messages": [],
+			"model-namespace": "https://kiegroup.org/dmn/_279EFC1A-FF7A-42C5-986D-C913050A1B69",
+			"model-name": "insurance-premium",
+			"decision-name": null,
+			"dmn-context": {
+				"Insurance Premium": 2000,
+				"hasPrevInsurance": true,
+				"Age": 18
+			},
+			"decision-results": {
+				"_74A37BBE-F995-42C0-842C-6AC0CE4A4FF4": {
+				"messages": [],
+				"decision-id": "_74A37BBE-F995-42C0-842C-6AC0CE4A4FF4",
+				"decision-name": "Insurance Premium",
+				"result": 2000,
+				"status": "SUCCEEDED"
+				}
+			}
+			}
+		}
+		}
+
+=============
