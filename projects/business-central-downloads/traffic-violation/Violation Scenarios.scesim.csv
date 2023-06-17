@@ -1,0 +1,8 @@
+"#",Scenario description,GIVEN,GIVEN,GIVEN,GIVEN,EXPECT,EXPECT,EXPECT
+"#",Scenario description,Driver,Violation,Violation,Violation,Fine,Fine,Should the driver be suspended?
+"#",Scenario description,Points,ActualSpeed,SpeedLimit,Type,Amount,Points,value
+1,Above speed limit: 10km/h and 30 km/h,10,120,100,"""speed""",500,3,"""No"""
+2,Above speed limit: more than 30 km/h,10,150,100,"""speed""",1000,7,"""No"""
+3,Parking violation,10,,,"""parking""",100,1,"""No"""
+4,DUI violation,10,,,"""driving under the influence""",1000,5,"""No"""
+5,Driver suspended,15,140,100,"""speed""",1000,7,"""Yes"""

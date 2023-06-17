@@ -1,0 +1,456 @@
+Decision Manager(RHDM): https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11
+
+Business Central is the GUI where we create and manage business rules.
+	It can be installed in a Red Hat JBoss EAP instance or on the Red Hat OpenShift Container Platform (OpenShift).
+	It is also available as a standalone JAR file. You can use the Business Central standalone JAR file to run Business Central without deploying it to an application server.
+
+KIE Server is the server where rules and other artifacts are executed.
+	It is used to instantiate and execute rules and solve planning problems.
+	We can install KIE Server in a Red Hat JBoss EAP instance, in a Red Hat JBoss EAP cluster, on OpenShift, in an Oracle WebLogic server instance, in an IBM WebSphere Application Server instance, or as a part of Spring Boot application.
+
+	You can configure KIE Server to run in managed or unmanaged mode.
+	If KIE Server is unmanaged, you must manually create and maintain KIE containers (deployment units). 
+	A KIE container is a specific version of a project. 
+	
+	If KIE Server is managed, the Decision Manager controller manages the KIE Server configuration and you interact with the Decision Manager controller to create and maintain KIE containers.
+	
+	The Decision Manager controller is integrated with Business Central. 
+	If you install Business Central on Red Hat JBoss EAP, use the Execution Server page to create and maintain KIE containers. 
+	However, if you do not install Business Central, you can install the headless Decision Manager controller and use the REST API or the KIE Server Java Client API to interact with it.
+	
+Red Hat build of OptaPlanner is integrated in Business Central and KIE Server. It is a lightweight, embeddable planning engine that optimizes planning problems.
+
+========
+Red Hat Decision Manager installation platforms:
+Every Red Hat Decision Manager release is certified on a variety of operating systems, JVMs, web browsers, and database combinations. 
+
+RHDM supported repositories:
+		Git Repositories
+		Apache Maven
+
+installation environment options for RHDM:
+		Development environment: one Business Central installation + at least one KIE Server installation.
+		Runtime environment: one or more KIE Server instances with or without Business Central.
+
+RHDM roles & users:
+	To access Business Central or KIE Server, you must create users and assign them appropriate roles before the servers are started.
+	The admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE ServerThe admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE Server.
+
+
+I. Getting started with Red Hat Decision Manager: 
+=================================================
+Ref: https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11/html/getting_started_with_red_hat_decision_manager/decision-examples-central-con_getting-started-decision-services
+-------------------------------------------------
+As a business rules developer,
+	We can use Business Central in Red Hat Decision Manager or the Red Hat Decision Manager DMN modeler in VSCode to design a variety of decision services.
+
+Sample projects are available in Business Central:
+	Course_Scheduling: (Business optimization)
+	Dinner_Party: (Business optimization) 
+	Employee_Rostering: (Business optimization)
+	Evaluation_Process: (Process automation)
+	IT_Orders: (Process automation and case management) 
+	Mortgages: (Decision management with rules) 
+	Mortgage_Process: (Process automation) 
+	OptaCloud: (Business optimization)
+	Traffic_Violation: (Decision management with DMN)
+	
+Red Hat Decision Manager BPMN and DMN modelers
+	We can use to design Business Process Model and Notation (BPMN) process models and Decision Model and Notation (DMN) decision models using graphical modelers.
+	1) Business Central: Here we can create DMN asset 
+	2) Red Hat Decision Manager VSCode extension: 
+		VSCode is the preferred integrated development environment (IDE) for developing new business applications.
+
+		"Red Hat Business Automation Bundle" VSCode extension that enables you to design Decision Model and Notation (DMN) decision models, Business Process Model and Notation (BPMN) 2.0 business processes.
+
+		Open VSCode--> Extentions--> Search "Red Hat Business Automation Bundle" --> Install-->Restart VSCode.
+
+		For new DMN or BPMN models, you can also enter dmn.new or bpmn.new in a web browser to design your DMN or BPMN model in the online modeler. When you finish creating your model, you can click Download in the online modeler page to import your DMN or BPMN file into your Red Hat Decision Manager project in VSCode.
+	
+	3) Creating and executing DMN and BPMN models using Maven:
+		We can use Maven archetypes to develop DMN and BPMN models in VSCode using the Red Hat Decision Manager VSCode extension instead of Business Central. 
+		
+		Generate maven project through below command.
+		
+		> mvn archetype:generate -DarchetypeGroupId=org.kie -DarchetypeArtifactId=kie-kjar-archetype  -DarchetypeVersion=7.73.0.Final
+		project : mybusinessapp is created succfully. Ref: /d/codebase/git/rhpam_rhdm/projects/mybusinessapp
+
+		Open Folder mybusinessapp in VSCode.
+		1) To create a business process, create a new file with .bpmn or .bpmn2
+			Create new file "Process.bpmn" under src\main\java\org\kie\businessapp
+		2) To create a DMN model, create a new file with .dmn
+			Create new file "AgeDecision.dmn" under src\main\java\org\kie\businessapp
+		3) To create a test scenario simulation model, create a new file with .scesim
+			Create new file "TestAgeScenario.scesim" under src\main\java\org\kie\businessapp
+		4) mvn clean install
+		5) target\mybusinessapp-1.0.jar
+			We can deploy the generated knowledge JAR (KJAR) of your business application on a running KIE Server using the REST API. 
+		We check later "How to deploy jar in KIE SERVER"
+
+======
+		
+Creating the "traffic-violations" project in Business Central sample like Traffic_Violation: (Decision management with DMN):
+	1) Business Central-->Design-->MySpace-->Add Project--> Name=traffic-violation --> Add
+Creating the traffic violations DMN decision requirements diagram (DRD)
+	2) Select traffic-violation--> Add Asset--> DMN=Traffic Violation & select default package-->OK
+		Drag and Drop:  DMN Input Data--> Rename to Driver
+						DMN Input Data--> Rename to Violation
+						DMN Decision ---> Rename to Fine
+							Join Violation to File
+						DMN Decision ---> Rename to Should the driver be suspended?
+							Join Driver to Should the driver be suspended?
+							Join Fine to Should the driver be suspended?
+						
+Creating the traffic violations DMN custom data types
+	3) Click on "Data Types" Tab to define the custom data types for the traffic violations project.
+		Add a custom Data type--> Name=tDriver, Type=Structure -->Save
+			add Name(string), Age(number), State(string), City(string), Points(number)-->Save
+		Add a custom Data type--> Name=tViolation, Type=Structure -->Save
+			add code(string), Date(date),SpeedLimit(number), ActualSpeed(number) -->Save
+			add Type(string) and Add constraints -->Enumarations--> speed, parking, driving under the influence --> OK
+		Add a custom Data type --> Name=tFine , Type=Structure -->Save
+			add Amount(number), Points(number) -->Save
+Assigning custom data types to the DRD input and decision nodes
+	4) Model --> select `Driver` --> Properties --> select tDriver -->Save
+				 select `Violation` --> Properties --> select tViolation -->Save
+				 select `Fine` --> Properties --> select tFine -->Save
+				 select `Should the driver be suspended?` --> Properties --> data type(string), Question=Should the driver be suspended due to points on his driver license?, Allowed Answers=Yes, No--> Save
+Defining the traffic violations DMN decision logic
+	5) Model--> select `Fine` --> Edit--> Select Expression=Decision Table
+				Right click on Violation.Date --> Delete
+				Right click on Violation.Code --> Delete
+				Right click on Violation.SpeedLimit --> Delete
+				Click on Violation.ActualSpeed update to Violation.ActualSpeed - Violation.SpeedLimit
+				
+				Add rows in tables as below
+				"speed"							[10..30)	500		3
+				"speed"							>=30		1000	7
+				"parking"						-			100		1
+				"driving under the influence"	-			1000	5
+				-->Save
+	6) Model--> select `Should the driver be suspended?` --> Edit--> Select Expression=Context
+				Click on Click ContextEntry-1--> Name=Total Points, Data Type=number
+				Click the cell next to Total Points--> select Literal Expression--> Enter --> Driver.Points + Fine.Points 
+				In the cell below Driver.Points + Fine.Points--> Select  Literal Expression--> Enter --> if Total Points >= 20 then "Yes" else "No"
+				--> Save
+	Ignore any warnings related to enumaration for Violation.Type
+	Navigate to the traffic-violation project --> Build --> 			
+
+Test scenarios
+	are useful to validate the functionality of business rules and business rule data (for rules-based test scenarios) or of DMN models (for DMN-based test scenarios) before deploying them into a production environment. 
+	RHDM supports both the new Test Scenarios designer(rules & DMN testing) and the former Test Scenarios (Legacy) designer(Only rules testing).
+	We can run Test scenarios at project level or specific asset level.
+
+Testing the traffic violations using test scenarios	
+	7) Select traffic-violation--> Add Asset--> Test Scenarios(Decision)--> Test Scenarios=Violation Scenarios & select default package, Source Type=DMN 
+		Choose a DMN asset=Traffic Violation.dmn --> OK to open the Violation Scenarios test scenario in the Test Scenarios designer.
+		Under Driver column sub-header, right-click the State, City, Age, and Name value cells and select Delete column from the context menu options to remove them.
+		Under Violation column sub-header, right-click the Date and Code value cells and select Delete column to remove them.
+		
+		Insert the below values 
+		Scenario description					Points		ActualSpeed		SpeedLimit		Type		Amount		Points 		Should the driver be suspended?
+		-------------------------------------------------------------------------------------------------------------------------------------------------------
+		Above speed limit: 10km/h and 30 km/h	10			120				100				"speed"		500			3			"No"
+		Above speed limit: more than 30 km/h	10			150				100				"speed"		1000		7			"No"
+		Parking violation						10			 				 				"parking"	100			1			"No"
+		DUI violation							10			 				 				"driving under the influence"	1000	5	"No"
+		Driver suspended						15			140				100				"speed"		1000		7			"Yes"
+	-->Save
+	--> Click on Play [>] icon
+
+	Build ---> Deploy
+	
+	8) Menu--> Execution Servers --> check the deployment unit name: traffic-violation_1.0.0-SNAPSHOT
+			Open API swagger page: http://localhost:8080/kie-server/docs/
+			Under DMN Modles--> GET /server/containers/{containerId}/dmn
+			Try it out--> containerId=traffic-violation_1.0.0-SNAPSHOT
+			Response application/json
+			Execute
+			Provide credentials kieserver/kieserver1! (if it prompt)
+			200
+			Response:
+			{
+			"type": "SUCCESS",
+			"msg": "OK models successfully retrieved from container 'traffic-violation_1.0.0-SNAPSHOT'",
+			"result": {
+				"dmn-model-info-list": {
+				"models": [
+					{
+					"model-namespace": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+					"model-name": "Traffic Violation",
+					"model-id": "_9B8DD86C-6633-4189-914A-664B3972492F",
+					"decisions": [
+						{
+						"decision-id": "_C59EB01A-DA69-48AB-A953-FDD72B41AD0A",
+						"decision-name": "Fine"
+						},
+						{
+						"decision-id": "_FB5972D0-1B37-4B3C-82C8-DD890D7A9594",
+						"decision-name": "Should the driver be suspended?"
+						}
+					],
+					"inputs": [
+						{
+						"inputdata-id": "_E96F7DE9-9794-43D2-826E-1779F7678DC6",
+						"inputdata-name": "Violation",
+						"inputdata-typeRef": {
+							"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+							"local-part": "tViolation",
+							"prefix": ""
+						}
+						},
+						{
+						"inputdata-id": "_B4E593EB-476C-446C-8F77-CBAC01A9B292",
+						"inputdata-name": "Driver",
+						"inputdata-typeRef": {
+							"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+							"local-part": "tDriver",
+							"prefix": ""
+						}
+						}
+					],
+					"itemDefinitions": [
+						{
+						"itemdefinition-id": "_E85FD503-4AAC-46A5-9950-9905BCD7C710",
+						"itemdefinition-name": "tDriver",
+						"itemdefinition-typeRef": null,
+						"itemdefinition-itemComponent": [
+							{
+							"itemdefinition-id": "_9A5B2424-739E-495E-BB28-DAA7CDE1D336",
+							"itemdefinition-name": "Name",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "string",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_D28574B8-2435-4E55-91E7-D6DEC0773013",
+							"itemdefinition-name": "Age",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_40D08567-7AAC-4E42-A57B-EBABB6715468",
+							"itemdefinition-name": "State",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "string",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_78353CB7-D344-4FFC-B40D-02044A13FAED",
+							"itemdefinition-name": "City",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "string",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_F397780F-31D4-46B0-80D3-6D04DD13CB02",
+							"itemdefinition-name": "Points",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							}
+						],
+						"itemdefinition-isCollection": false
+						},
+						{
+						"itemdefinition-id": "_A30A2286-B7D5-485F-95A2-08E58C9237C7",
+						"itemdefinition-name": "tFine",
+						"itemdefinition-typeRef": null,
+						"itemdefinition-itemComponent": [
+							{
+							"itemdefinition-id": "_329288E9-02CA-4FBC-86FE-4F12BAA00900",
+							"itemdefinition-name": "Amount",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_72F55031-B29C-4980-9E83-DE76528EB994",
+							"itemdefinition-name": "Points",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							}
+						],
+						"itemdefinition-isCollection": false
+						},
+						{
+						"itemdefinition-id": "_FEF0529D-2C68-4D72-8496-DE1AF6D5A399",
+						"itemdefinition-name": "tViolation",
+						"itemdefinition-typeRef": null,
+						"itemdefinition-itemComponent": [
+							{
+							"itemdefinition-id": "_E643733D-7F8A-4E1B-BC41-89C6368C2047",
+							"itemdefinition-name": "Code",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "string",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_B6992ED9-B21D-4599-9240-BF0AC416BE04",
+							"itemdefinition-name": "Date",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "date",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_F59CE22B-0E87-4994-B6A2-7D00093A5817",
+							"itemdefinition-name": "Type",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "string",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_3D97AFBB-AB32-4C18-A770-E97E2AEC5421",
+							"itemdefinition-name": "SpeedLimit",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							},
+							{
+							"itemdefinition-id": "_8CD9E978-A7CA-4377-B5F4-B778C4899501",
+							"itemdefinition-name": "ActualSpeed",
+							"itemdefinition-typeRef": {
+								"namespace-uri": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+								"local-part": "number",
+								"prefix": ""
+							},
+							"itemdefinition-itemComponent": [],
+							"itemdefinition-isCollection": false
+							}
+						],
+						"itemdefinition-isCollection": false
+						}
+					],
+					"decisionServices": []
+					}
+				]
+				}
+			}
+			}
+	
+	9) Interacting with the deployed DMN model using REST.
+	Under DMN Modles--> POST /server/containers/{containerId}/dmn
+	Try it out--> containerId=traffic-violation_1.0.0-SNAPSHOT
+	Request & Response context-Type=application/json
+	Request Body: 
+	{
+		"model-namespace": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+		"model-name": "Traffic Violation",
+		"decision-id": null,
+		"decision-name": null,
+		"dmn-context": {
+			"Driver": {
+				"Name": "Ravi",
+				"Age": 20,
+				"State": "AP",
+				"City": "Guntur",
+				"Points": 10
+			},
+			"Violation": {
+				"Code": "ABC",
+				"Type": "speed",
+				"SpeedLimit": 100,
+				"ActualSpeed": 120
+			}
+		}
+	}
+	
+	200
+	Responce :
+	{
+		"type": "SUCCESS",
+		"msg": "OK from container 'traffic-violation_1.0.0-SNAPSHOT'",
+		"result": {
+			"dmn-evaluation-result": {
+				"messages": [],
+				"model-namespace": "https://kiegroup.org/dmn/_B88E7E5A-2A82-4E31-B6EF-14FF498AF911",
+				"model-name": "Traffic Violation",
+				"decision-name": null,
+				"dmn-context": {
+					"Violation": {
+						"Type": "speed",
+						"SpeedLimit": 100,
+						"ActualSpeed": 120,
+						"Code": "ABC"
+					},
+					"Driver": {
+						"Points": 10,
+						"State": "AP",
+						"City": "Guntur",
+						"Age": 20,
+						"Name": "Ravi"
+					},
+					"Fine": {
+						"Points": 3,
+						"Amount": 500
+					},
+					"Should the driver be suspended?": "No"
+				},
+				"decision-results": {
+					"_FB5972D0-1B37-4B3C-82C8-DD890D7A9594": {
+						"messages": [],
+						"decision-id": "_FB5972D0-1B37-4B3C-82C8-DD890D7A9594",
+						"decision-name": "Should the driver be suspended?",
+						"result": "No",
+						"status": "SUCCEEDED"
+					},
+					"_C59EB01A-DA69-48AB-A953-FDD72B41AD0A": {
+						"messages": [],
+						"decision-id": "_C59EB01A-DA69-48AB-A953-FDD72B41AD0A",
+						"decision-name": "Fine",
+						"result": {
+							"Points": 3,
+							"Amount": 500
+						},
+						"status": "SUCCEEDED"
+					}
+				}
+			}
+		}
+	}		
