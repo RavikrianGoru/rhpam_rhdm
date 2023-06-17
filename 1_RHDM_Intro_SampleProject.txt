@@ -1,0 +1,264 @@
+Red Hat Decision Manager Overview:
+=================================
+https://developers.redhat.com/products/red-hat-decision-manager/overview
+
+Red Hat Decision Manager is a fast, lightweight, cloud-native business rules and decision management platform. 
+The platform enables developers and other personas to develop rules and decision-driven applications, services, and systems in an agile way.
+
+DM approaches to build Decison services:
+     1) Kogito based Decision applicaton: Kogito code-generation and Quarkus hot-reload features.
+     2) Drools based Decision Engine: highly popular and de-facto open source rules engine
+     3) DMN: Decision Model and Notation: 
+          Decision Manager is the first open-source DMN v1.3 runtime that supports the full FEEL Compliance Level 3 of the DMN specification.
+          DMN simplifies the process model by removing the rules and decisions from the process and creating the optimal outcome.
+     4) Business Optimizer: 
+          Business Optimizer (aka OptaPlanner) provides an easy-to-use framework to build solvers in plain old Java that find optimized solutions to these problems.
+     5) Agile development: 
+          Decision Manager provides tools that target all users. (VSCode Plugin, Git, Maven, Jenkins, SonarQube, Openshift...)
+          The VSCode plugin allows developers to author decisions using the DMN specification and to test it using an intuitive test scenario simulation tool.
+     6) Cloud-Native:
+          CloudNative development focuses on the creation of lightweight, stateless, microservices, providing powerful APIs deployed in container environments using development practices based on DevOps and Continuous Delivery engineering methodologies.
+
+RHDM use cases:
+===============
+     Credit Scoring
+     Fraud detection
+     Premium calculation
+     Law & Regulatory compliance
+
+
+
+          
+Red Hat Decision Manager on EAP:
+===============================
+https://developers.redhat.com/articles/red-hat-decision-manager-on-eap#
+
+Follow the above link: set environment, clone git project, install Decision Central and KIE Server. 
+
+Decision Central is the component that allows us to develop business rules and decisions, manage projects, and build and package them. 
+Finally, you can deploy it in KIE Server, the rules and decision engine. 
+
+KIE Server is a lightweight component capable of executing the rules and decisions. 
+It can be easily integrated with your services, for example via REST or JMS.
+
+
+Pre-requisites
+     java 11
+     Git bash (Git client)
+================
+1) Download the below 3 files:
+     Red Hat JBoss EAP 7.3                      https://developers.redhat.com/download-manager/file/jboss-eap-7.3.0.zip
+     RHDM - Decision Central, deployable zip    https://developers.redhat.com/download-manager/file/rhdm-7.11.0-decision-central-eap7-deployable.zip
+     RHDM - KIE Server, deployable zip          https://developers.redhat.com/download-manager/file/rhdm-7.11.0-kie-server-ee8.zip
+2) Clone the repo from github:
+     https://github.com/jbossdemocentral/rhdm7-install-demo
+
+3) Copy above 3 zip files into cloned repo "rhdm7-install-demo\installs"      
+     i.e D:\RedHat\git\rhdm7-install-demo\installs
+
+4) Run init.sh
+
+5) Start the Red Hat Decision Manager with:  .\target\jboss-eap-7.3\bin\standalone.sh
+
+Wait for some time to get bewlow console msg.
+   
+6) Access Decision Central by navigating: http://localhost:8080/decision-central/
+     dmAdmin/redhatdm1!
+7) Access Kie server's/Executor Server swagger url: http://localhost:8080/kie-server/docs/
+     kieserver/kieserver1!
+=================
+
+1) Decision Central--> Home-->Design-->myspace-->import Project-->Repository URL: https://github.com/jbossdemocentral/rhdm7-loan-demo-repo.git
+     -->Import--> select loan-application project --> OK
+2) We can obsever 
+     i) 3 Data objects: Applicant, Loan, Recommendation
+     ii) 1 DMN: recommendation
+     iii) 1 Guided Decision Tables: loan-approval
+3) Open loan-approval (Guided Decision Tables): Observe
+4) Open recommendation (DMN) : Observe
+5) Build, Deploy: project will be deployed in C:\Users\LENOVO/.m2/repository [Artifact "com.redhat.demos.dm:loan-application:1.2.0".]
+6) Menu --> Deploy--> Execution Servers: check the deployed project "loan-application_1.2.0"
+
+7) Open Swagger: http://localhost:8080/kie-server/docs/
+kieserver/kieserver1! 
+
+1) Under KIE Server and KIE Container:
+GET /server/containers option. 
+Click on Try it out
+Leave the parameters empty and click on Execute. 
+200 status
+output:
+"container-id": "loan-application_1.2.0",
+
+2)
+KIE session assets, and search for POST /server/containers/instances/{containerId} 
+Try it out!
+Parameter content-type and Response content type to application/json;
+
+containerId:    loan-application_1.2.0
+body:
+     {
+     "lookup": "default-stateless-ksession",
+     "commands": [
+          {
+               "insert": {
+                    "object": {
+                         "com.redhat.demos.dm.loan.model.Applicant": {
+                         "creditScore": 230,
+                         "name": "Jim Whitehurst"
+                         }
+                    },
+                    "out-identifier": "applicant"
+               }
+          },
+          {
+               "insert": {
+                    "object": {
+                         "com.redhat.demos.dm.loan.model.Loan": {
+                         "amount": 2500,
+                         "approved": false,
+                         "duration": 24,
+                         "interestRate": 1.5
+                         }
+                    },
+                    "out-identifier": "loan"
+               }
+          },
+          {
+               "fire-all-rules": {}
+          }
+     ]
+     }
+
+output:
+     {
+     "type": "SUCCESS",
+     "msg": "Container loan-application_1.2.0 successfully called.",
+     "result": {
+     "execution-results": {
+          "results": [
+          {
+               "value": {
+               "com.redhat.demos.dm.loan.model.Loan": {
+               "amount": 2500,
+               "duration": 24,
+               "interestRate": 1.5,
+               "approved": true,
+               "reason": "Congratulation your loan is approved!"
+               }
+               },
+               "key": "loan"
+          },
+          {
+               "value": {
+               "com.redhat.demos.dm.loan.model.Applicant": {
+               "name": "Jim Whitehurst",
+               "creditScore": 230
+               }
+               },
+               "key": "applicant"
+          }
+          ],
+          "facts": [
+          {
+               "value": {
+               "org.drools.core.common.DefaultFactHandle": {
+               "external-form": "0:2:1648224993:1648224993:2:DEFAULT:NON_TRAIT:com.redhat.demos.dm.loan.model.Loan"
+               }
+               },
+               "key": "loan"
+          },
+          {
+               "value": {
+               "org.drools.core.common.DefaultFactHandle": {
+               "external-form": "0:1:851529111:851529111:1:DEFAULT:NON_TRAIT:com.redhat.demos.dm.loan.model.Applicant"
+               }
+               },
+               "key": "applicant"
+          }
+          ]
+     }
+     }
+     }
+ 
+3) /server/containers/{containerId}/dmn GET
+containerId: loan-application_1.2.0
+parameters : application/json
+	
+Response body
+{
+  "type": "SUCCESS",
+  "msg": "OK models successfully retrieved from container 'loan-application_1.2.0'",
+  "result": {
+    "dmn-model-info-list": {
+      "models": [
+        {
+          "model-namespace": "https://kiegroup.org/dmn/_C159F266-40FF-49CB-B4D9-447DFACDDC16",
+          "model-name": "recommendation",
+          "model-id": "_A67C7376-490E-4C47-826D-1748DB118976",
+          "decisions": [
+            {
+              "decision-id": "_2B8FE31F-9977-467C-82C0-BF78414573A8",
+              "decision-name": "Recommendation"
+            }
+          ],
+          "inputs": [
+            {
+              "inputdata-id": "_595824CC-0014-4E72-B511-B337953C42DF",
+              "inputdata-name": "Credit Score",
+              "inputdata-typeRef": {
+                "namespace-uri": "https://kiegroup.org/dmn/_C159F266-40FF-49CB-B4D9-447DFACDDC16",
+                "local-part": "number",
+                "prefix": ""
+              }
+            }
+          ],
+          "itemDefinitions": [],
+          "decisionServices": []
+        }
+      ]
+    }
+  }
+}
+ 
+4) In the KIE Server Swagger UI, navigate to the DMN Modles section and locate the POST /server/containers/{containerId}/dmn
+containerId: loan-application_1.2.0
+parameters : application/json
+input: 
+{
+	"model-namespace": "https://kiegroup.org/dmn/_C159F266-40FF-49CB-B4D9-447DFACDDC16",
+	"model-name": "recommendation",
+	"decision-name": [],
+	"decision-id": [],
+	"dmn-context": {
+		"Credit Score": 100
+	}
+}
+
+output: 
+{
+  "type": "SUCCESS",
+  "msg": "OK from container 'loan-application_1.2.0'",
+  "result": {
+    "dmn-evaluation-result": {
+      "messages": [],
+      "model-namespace": "https://kiegroup.org/dmn/_C159F266-40FF-49CB-B4D9-447DFACDDC16",
+      "model-name": "recommendation",
+      "decision-name": [],
+      "dmn-context": {
+        "Recommendation": "Please add an extra guarantee and apply again",
+        "Credit Score": 100
+      },
+      "decision-results": {
+        "_2B8FE31F-9977-467C-82C0-BF78414573A8": {
+          "messages": [],
+          "decision-id": "_2B8FE31F-9977-467C-82C0-BF78414573A8",
+          "decision-name": "Recommendation",
+          "result": "Please add an extra guarantee and apply again",
+          "status": "SUCCEEDED"
+        }
+      }
+    }
+  }
+===================
+     
