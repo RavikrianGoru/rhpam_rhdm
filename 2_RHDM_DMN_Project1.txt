@@ -1,0 +1,228 @@
+RedHat JBoss Automation Products(Suite)
+	Fast, lightweight & cloud native, separates decision logic from app code , performace and scalability.
+1) RHDM - Red Hat Decision Manager
+	Complex Event Processing: 
+	Business Rules
+	Business Optiomizer
+2) RHPAM- Red Hat Process Automation Manager is super set of RHDM.
+	Process Management
+	Entando UX Platform
+
+RHDM renamed from BRMS(Red Hat  Business Rule Management Service) Ref: https://www.youtube.com/watch?v=wjbKje3GBR8
+
+	a) Low code workbench[GUI drag and drop] Ref: https://www.youtube.com/watch?v=ZGTveXt19fk
+	b) Decision Model & notation (DMN) Ref: https://www.youtube.com/watch?v=SyZbRg1xl7Q
+		DMN is an OMG Object management Group standard for creating decision models.
+		Is designed for Business Users as a graphical language for decision modeling.
+		Is directly executable no transilation required.
+		Is interchangable amoung tool: use one vendor's DMN tool to  create and export & use it in another.
+	DMN Components:
+		1) Graphical Language for Modeling: DRG, DRD(Decision Requirement Graph, Diagram)
+		   Ex: Decision Tables
+		2) FEEL Expression Language: Friendly Enough Expression Language
+		   Ex: every price in [ 80, 11, 90 ] 
+		       satifies price > 10
+			   
+		3) MetaModel and Interchange
+			3 levels of conformity and XML interchange format.
+	Conformace levels:
+		Conformace Level-1:
+			Required support for authoring DRD, Decision Logic and Decision Tables.It is basically "docummentation only". No execution required.
+		Conformace Level-2:
+			Level-1 + Support S-FEEL (Simplified FEEL Expression language)
+			Requires execution & Requires the logic modeled in Level-1 tobe expressed in S-FEEL
+		Conformace Level-3:
+			Levl-2 + Full FEEL. This includes additional modeling elements like "Boxed Expression"
+	DMN Technlogy Compatibility Kit(TCK) Ref: https://dmn-tck.github.io/tck/
+		DRD: D:\RedHat\imgs\DMN_DRD.JPG
+		Decision Node: It takes one or more elements as input and determines the output based on Decision Logic.
+		Business Knowledge Model: we place Decision Logic Here. ex: Decision Table.
+		
+	DMN Demo: https://www.youtube.com/watch?v=Og2AoOFnv4A
+		1) Enable, Use  Decision Central DMN Design
+			Login Decision Central: http://localhost:8080/decision-central dmAdmin/redhatdm1!
+			Create user : analyst/analyst map analyst rule
+			Login out
+			Login Decision Central: http://localhost:8080/decision-central analyst/analyst
+			Add project: DMNDemo
+			C:\Users\LENOVO/.m2/repository [ Artifact "com.myspace:DMNDemo:1.0.0-SNAPSHOT" ]
+			Add asset DMN--> ageClassification select package --> OK
+			Drag and Drop : DMN Decision, DMN Business Knowledge Model, DMN Input data.
+							Join BK Model, Input data to DMN Decision.
+			Select DMN Decision--> Properties : name=Age Classification, Data type=string
+			Select DMN Business Knowledge Model--> Properties : name=Age Classification Table, Data Type=string
+			Select DMN Input data--> Properties : name=Age, Data Type=number
+			
+			select DMN Business Knowledge Model(Age Classification Table)--> Edit--> Clear--> select Decision Table
+				--> Edit Parameter age,number
+				--> Edit Input Clause age,number
+				--> <18 "Underag"
+					[18..65) "Adult"
+					>=65 "Senior"
+			select DMN Decision(Age Classification)--> Edit--> select invocation--> Age Classification Table
+				--> Edit parameter age,number--> literal Expression --> Age i.e input Data
+			Validate --> Save --> Build-->Deploy
+
+		2) Deploy DMN project on the Execution Server
+			Menu --> Deploy--> check the deployment unit name: DMNDemo_1.0.0-SNAPSHOT
+			Open API swagger page: http://localhost:8080/kie-server/docs/
+			Under DMN Modles--> GET /server/containers/{containerId}/dmn
+			Try it out--> containerId=DMNDemo_1.0.0-SNAPSHOT
+			Response application/json
+			Execute
+			Provide credentials kieserver/kieserver1! (if it prompt)
+			200
+			Response:
+					{
+					"type": "SUCCESS",
+					"msg": "OK models successfully retrieved from container 'DMNDemo_1.0.0-SNAPSHOT'",
+					"result": {
+						"dmn-model-info-list": {
+						"models": [
+							{
+							"model-namespace": "https://kiegroup.org/dmn/_C2100219-8D14-42EC-AF9E-FCEBA5516868",
+							"model-name": "ageClassification",
+							"model-id": "_39535245-FA21-4E04-856E-1892A78278DD",
+							"decisions": [
+								{
+								"decision-id": "_65E4A07F-C3DB-452B-BED1-B6AEF4422375",
+								"decision-name": "Age Classification"
+								}
+							],
+							"inputs": [
+								{
+								"inputdata-id": "_A155C1B0-9143-4E73-A133-3883877BB735",
+								"inputdata-name": "Age",
+								"inputdata-typeRef": {
+									"namespace-uri": "https://kiegroup.org/dmn/_C2100219-8D14-42EC-AF9E-FCEBA5516868",
+									"local-part": "number",
+									"prefix": ""
+								}
+								}
+							],
+							"itemDefinitions": [],
+							"decisionServices": []
+							}
+						]
+						}
+					}
+					}			
+		3) Interacting with the deployed DMN model using REST.
+			Under DMN Modles--> POST /server/containers/{containerId}/dmn
+			Try it out--> containerId=DMNDemo_1.0.0-SNAPSHOT
+			Request & Response context-Type=application/json
+
+			Case-1:
+			Request Body: 
+			{
+				"model-namespace": "https://kiegroup.org/dmn/_C2100219-8D14-42EC-AF9E-FCEBA5516868",
+				"model-name": "ageClassification",
+				"dmn-context": {"Age": 18}
+			}
+			Execute
+			Response:
+			200
+			{
+			"type": "SUCCESS",
+			"msg": "OK from container 'DMNDemo_1.0.0-SNAPSHOT'",
+			"result": {
+				"dmn-evaluation-result": {
+				"messages": [],
+				"model-namespace": "https://kiegroup.org/dmn/_CFF0389C-5449-4BC0-90B7-C01A3FC239A3",
+				"model-name": "ageClassification",
+				"decision-name": [],
+				"dmn-context": {
+					"Age Classification": "Adult",
+					"Age": 18,
+					"Age Classification Table": "function Age Classification Table( age )"
+				},
+				"decision-results": {
+					"_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED": {
+					"messages": [],
+					"decision-id": "_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED",
+					"decision-name": "Age Classification",
+					"result": "Adult",
+					"status": "SUCCEEDED"
+					}
+				}
+				}
+			}
+			}			
+			Case-2:
+			Request Body: 
+			{
+				"model-namespace": "https://kiegroup.org/dmn/_CFF0389C-5449-4BC0-90B7-C01A3FC239A3",
+				"model-name": "ageClassification",
+				"dmn-context": {"Age": 17}
+			}
+			Response:
+			200
+			{
+			"type": "SUCCESS",
+			"msg": "OK from container 'DMNDemo_1.0.0-SNAPSHOT'",
+			"result": {
+				"dmn-evaluation-result": {
+				"messages": [],
+				"model-namespace": "https://kiegroup.org/dmn/_CFF0389C-5449-4BC0-90B7-C01A3FC239A3",
+				"model-name": "ageClassification",
+				"decision-name": [],
+				"dmn-context": {
+					"Age Classification": "Underage",
+					"Age": 17,
+					"Age Classification Table": "function Age Classification Table( age )"
+				},
+				"decision-results": {
+					"_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED": {
+					"messages": [],
+					"decision-id": "_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED",
+					"decision-name": "Age Classification",
+					"result": "Underage",
+					"status": "SUCCEEDED"
+					}
+				}
+				}
+			}
+			}		
+			Case-3:
+			Request Body: 
+			{
+				"model-namespace": "https://kiegroup.org/dmn/_CFF0389C-5449-4BC0-90B7-C01A3FC239A3",
+				"model-name": "ageClassification",
+				"dmn-context": {"Age": 65}
+			}
+			Response:
+			200
+			{
+			"type": "SUCCESS",
+			"msg": "OK from container 'DMNDemo_1.0.0-SNAPSHOT'",
+			"result": {
+				"dmn-evaluation-result": {
+				"messages": [],
+				"model-namespace": "https://kiegroup.org/dmn/_CFF0389C-5449-4BC0-90B7-C01A3FC239A3",
+				"model-name": "ageClassification",
+				"decision-name": [],
+				"dmn-context": {
+					"Age Classification": "Senior",
+					"Age": 17,
+					"Age Classification Table": "function Age Classification Table( age )"
+				},
+				"decision-results": {
+					"_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED": {
+					"messages": [],
+					"decision-id": "_62F88CC4-7CD8-4F84-91B9-6945DA1C3CED",
+					"decision-name": "Age Classification",
+					"result": "Underage",
+					"status": "SUCCEEDED"
+					}
+				}
+				}
+			}
+			}		
+
+		DMN modles at conformance level 3.
+	c) Other Notable Features
+	d) Cloud Native
+	e) Out of box Experience
+
+
+
