@@ -12,7 +12,7 @@ RHDM renamed from BRMS(Red Hat  Business Rule Management Service) Ref: https://w
 
 	a) Low code workbench[GUI drag and drop] Ref: https://www.youtube.com/watch?v=ZGTveXt19fk
 	b) Decision Model & notation (DMN) Ref: https://www.youtube.com/watch?v=SyZbRg1xl7Q
-		DMN is an OMG Object management Group standard for creating decision models.
+		DMN is an OMG: Object management Group standard for creating decision models.
 		Is designed for Business Users as a graphical language for decision modeling.
 		Is directly executable no transilation required.
 		Is interchangable amoung tool: use one vendor's DMN tool to  create and export & use it in another.
@@ -30,7 +30,7 @@ RHDM renamed from BRMS(Red Hat  Business Rule Management Service) Ref: https://w
 			Required support for authoring DRD, Decision Logic and Decision Tables.It is basically "docummentation only". No execution required.
 		Conformace Level-2:
 			Level-1 + Support S-FEEL (Simplified FEEL Expression language)
-			Requires execution & Requires the logic modeled in Level-1 tobe expressed in S-FEEL
+			Requires execution & Requires the logic modeled in Level-1 to be expressed in S-FEEL
 		Conformace Level-3:
 			Levl-2 + Full FEEL. This includes additional modeling elements like "Boxed Expression"
 	DMN Technlogy Compatibility Kit(TCK) Ref: https://dmn-tck.github.io/tck/
@@ -49,9 +49,9 @@ RHDM renamed from BRMS(Red Hat  Business Rule Management Service) Ref: https://w
 			Add asset DMN--> ageClassification select package --> OK
 			Drag and Drop : DMN Decision, DMN Business Knowledge Model, DMN Input data.
 							Join BK Model, Input data to DMN Decision.
-			Select DMN Decision--> Properties : name=Age Classification, Data type=string
-			Select DMN Business Knowledge Model--> Properties : name=Age Classification Table, Data Type=string
 			Select DMN Input data--> Properties : name=Age, Data Type=number
+			Select DMN Business Knowledge Model--> Properties : name=Age Classification Table, Data Type=string
+			Select DMN Decision--> Properties : name=Age Classification, Data type=string
 			
 			select DMN Business Knowledge Model(Age Classification Table)--> Edit--> Clear--> select Decision Table
 				--> Edit Parameter age,number

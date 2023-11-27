@@ -1,0 +1,5 @@
+Decision Manager(RHDM): https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11
+
+III. Deploying and managing Red Hat Decision Manager services
+	https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11/html/deploying_and_managing_red_hat_decision_manager_services/index
+

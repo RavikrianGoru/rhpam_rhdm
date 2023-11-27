@@ -34,7 +34,7 @@ installation environment options for RHDM:
 
 RHDM roles & users:
 	To access Business Central or KIE Server, you must create users and assign them appropriate roles before the servers are started.
-	The admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE ServerThe admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE Server.
+	The admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE Server The admin, analyst, and rest-all roles are reserved for Business Central. The kie-server role is reserved for KIE Server.
 
 
 I. Getting started with Red Hat Decision Manager: 
@@ -96,7 +96,7 @@ Creating the traffic violations DMN decision requirements diagram (DRD)
 		Drag and Drop:  DMN Input Data--> Rename to Driver
 						DMN Input Data--> Rename to Violation
 						DMN Decision ---> Rename to Fine
-							Join Violation to File
+							Join Violation to Fine
 						DMN Decision ---> Rename to Should the driver be suspended?
 							Join Driver to Should the driver be suspended?
 							Join Fine to Should the driver be suspended?

@@ -1,0 +1,536 @@
+Decision Manager(RHDM): https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11
+
+II. Developing decision services in Red Hat Decision Manager
+	https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.11/html/developing_decision_services_in_red_hat_decision_manager/index
+
+Describes how to develop decision services with RHDM using 
+		Decision Model and Notation (DMN) models, 
+		Drools Rule Language (DRL) files, 
+		guided decision tables, 
+		and other decision-authoring assets.
+
+RHDM supports several assets that can be used to define Business Decisions --> Decision Service
+Decision Model and Notation (DMN) to model a decision service graphically.
+DRG: Decision Requirements Graph.
+DRD: Decision Requirements Diagram.
+OMG: Object Management Group. 
+
+
+RHDM Assets:
+===========
+1. Decision Model and Notation (DMN) models
+2. Guided decision tables
+3. Spreadsheet decision tables
+4. Guided rules
+5. Guided rule templates
+7. DRL rules
+8. Predictive Model Markup Language (PMML) models
+
+RHDM BPMN(Business Process Model and Notation)  and DMN(Decision Model and Notation) modelers:
+==============================================================================================
+To design BPMN,DMN...executable
+1) Business Central application
+2) VSCode (Red Hat Decision Manager VSCode extension)
+	Open VSCode IDE--> Extentions --> Search "Red Hat Business Automation Bundle" --> Install --> Restart 
+3) Standalone BPMN and DMN editors
+4) bpmn.new or dmn.new online tools
+
+VSCode is the preferred integrated development environment (IDE) for developing new business applications.
+Several Business Central features are not supported in the VSCode.
+
+Creating and executing DMN and BPMN models using Maven
+	1. Create Red Hat Decision Manager project in cmd /git bash 
+	   > mvn archetype:generate \
+	   		-DarchetypeGroupId=org.kie \
+			-DarchetypeArtifactId=kie-kjar-archetype \
+			-DarchetypeVersion=7.73.0.Final
+	   
+	   This command generates a Maven project with required dependencies and generates required directories and files to build your business application.
+	2. Open the project in VSCode
+	   Right click on src/main/java/org/kie/businessapp --> new files
+	   		AgeDecision.dmn
+			Process.bpmn
+			TestAgeScenario.scesim
+		> mvn clean Install
+
+Decision Model and Notation (DMN):
+=================================
+	Decision Model and Notation (DMN) is a standard established by the Object Management Group (OMG) for describing and modeling operational decisions.
+
+
+DMN conformance levels:
+	The DMN specification defines three incremental levels of conformance in a software implementation. A product that claims compliance at one level must also be compliant with any preceding levels. 
+	
+	Conformance level 1
+		A DMN conformance level 1 implementation supports decision requirement diagrams (DRDs), decision logic, and decision tables, but decision models are not executable. 
+	Conformance level 2
+		A DMN conformance level 2 implementation includes the requirements in conformance level 1, and supports Simplified Friendly Enough Expression Language (S-FEEL) expressions and fully executable decision models.
+	Conformance level 3
+		A DMN conformance level 3 implementation includes the requirements in conformance levels 1 and 2, and supports Friendly Enough Expression Language (FEEL) expressions, the full set of boxed expressions, and fully executable decision models.
+	
+DMN decision requirements diagram (DRD) components
+	A decision requirements diagram (DRD) is a visual representation of your DMN model.
+	A DRD can represent part or all of the overall decision requirements graph (DRG) for the DMN model.
+	DRDs trace business decisions using decision nodes, business knowledge models, sources of business knowledge, input data, and decision services.
+
+Elements
+	Decision
+	Business knowledge model
+	Knowledge source
+	Input data
+	Decision service
+Requirement connectors
+	Information requirement
+	Knowledge requirement
+	Authority requirement
+Artifacts
+	Text annotation
+	Association
+
+DRD connector rules: refer images.
+Ref: rhpam_rhdm\imgs\DRC_ConnectorRules_1.PNG
+	 rhpam_rhdm\imgs\DRC_ConnectorRules_2.PNG
+	 rhpam_rhdm\imgs\DRC_ConnectorRules_3PNG
+
+Rule expressions in FEEL: 
+========================
+	Friendly Enough Expression Language (FEEL) is an expression language defined by the Object Management Group (OMG) DMN specification
+	FEEL expressions define the logic of a decision in a DMN model.
+	FEEL expressions in decision requirements diagrams (DRDs) occupy table cells in boxed expressions for decision nodes and business knowledge models.
+
+Data types in FEEL
+=================
+	Numbers: for both integers and floating point numbers.
+			 Decimal 128 format, with 34 digits of precision.
+			 FEEL uses null to represent invalid numbers.
+	Ex: 123, 123.45, 1.2e3(1.2 * 10**3), 0xff or 0XFF(255), 123.1f, 123.1F, 123.1d, 123.1D, 1234567l, 1234567L
+
+	Strings: "Ravi"
+
+	Boolean values: true, false, null
+	
+	Dates: Date literals are not supported in FEEL, but you can use the built-in date() function to construct date values. 
+	Ex: date( "2017-06-23" )
+	
+	Time: Time literals are not supported in FEEL, but you can use the built-in time() function to construct time values. The format is "hh:mm:ss[.uuu][(+-)hh:mm]"
+	Ex: time( "04:25:12" )
+		time( "14:10:00+02:00" )
+		time( "22:35:40.345-05:00" )
+		time( "15:00:30z" )
+
+	Date and time: Date and time literals are not supported in FEEL, but you can use the built-in date and time() function to construct date and time values. 
+	Ex: date and time( "2017-10-22T23:59:00" )
+		date and time( "2017-06-13T14:10:00+02:00" )
+		date and time( "2017-02-05T22:35:40.345-05:00" )
+		date and time( "2017-06-13T15:00:30z" )
+	* If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword dateTime as a synonym of date and time.
+
+	Days and time duration:Days and time duration literals are not supported in FEEL, but you can use the built-in duration() function to construct days and time duration values. 
+	Ex: duration( "P1DT23H12M30S" )
+		duration( "P23D" )
+		duration( "PT12H" )
+		duration( "PT35M" )
+	* If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword dayTimeDuration as a synonym of days and time duration
+
+	Years and months duration:Years and months duration literals are not supported in FEEL, but you can use the built-in duration() function to construct days and time duration values. 
+	Ex: duration( "P3Y5M" )
+		duration( "P2Y" )
+		duration( "P10M" )
+		duration( "P25M" )
+	* If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword yearMonthDuration as a synonym of years and months duration.
+
+	
+	Functions: FEEL has function literals (or anonymous functions) that you can use to create functions. 
+	Ex: function(a, b) a + b
+
+	Contexts: FEEL has context literals that you can use to create contexts. A context in FEEL is a list of key and value pairs, similar to maps in languages like Java.
+	Ex: { x : 5, y : 3 }
+
+	Ranges (or intervals): FEEL has range literals that you can use to create ranges or intervals
+	Ex: [ 1 .. 10 ]
+		x in [ 1 .. 100 ]
+
+	Lists: FEEL has list literals that you can use to create lists of items. A list in FEEL is represented by a comma-separated list of values enclosed in square brackets.
+	Ex: [ 2, 3, 4, 5 ]
+
+	Elements in a list can be accessed by index, where the first element is 1. Negative indexes can access elements starting from the end of the list so that -1 is the last element.
+	The second element of a list x:
+		x[2]
+	The second-to-last element of a list x:
+		x[-2]
+	The following expression returns 4:
+	count([ 2, 3, 4, 5 ]) 
+
+Built-in function in FEEL:
+=========================
+	To promote interoperability with other platforms and systems, Friendly Enough Expression Language (FEEL) includes a library of built-in functions. 
+	The built-in FEEL functions are implemented in the Drools Decision Model and Notation (DMN) engine so that you can use the functions in your DMN decision services.
+
+Conversion functions:
+	Syntax: date( from ) ---> using date
+		date("2020-06-01") ---> 2020-06-01
+		date( "2012-12-25" ) - date( "2012-12-24" ) = duration( "P1D" )
+		date(date and time( "2012-12-25T11:00:00Z" )) = date( "2012-12-25" )
+	Syntax: date(year, month, day)
+		date( 2012, 12, 25 ) = date( "2012-12-25" )
+	syntax: date and time( date, time )
+		date and time ( "2012-12-24T23:59:00" ) = date and time(date( "2012-12-24" ), time( "23:59:00" ))
+		date and time( "2012-12-24T23:59:00" ) + duration( "PT1M" ) = date and time( "2012-12-25T00:00:00" )
+	Syntax: time( from )
+		time( "23:59:00z" ) + duration( "PT2M" ) = time( "00:01:00@Etc/UTC" )
+	Syntax : time( from )
+		time(date and time( "2012-12-25T11:00:00Z" )) = time( "11:00:00Z" )
+	Syntax: time( hour, minute, second, offset? )
+		time( "23:59:00z" ) = time(23, 59, 0, duration( "PT0H" ))
+
+	Syntax: number( from, grouping separator, decimal separator )
+			from --> string representing a valid number
+			grouping separator --> Space ( ), comma (,), period (.), or null
+			decimal separator --> Same types as grouping separator, but the values cannot match
+		number( "1 000,0", " ", "," ) = number( "1,000.0", ",", "." )
+
+	Syntax: string( from )
+		string( 1.1 ) = "1.1"
+		string( null ) = null
+	Syntax: duration( from )
+		date and time( "2012-12-24T23:59:00" ) - date and time( "2012-12-22T03:45:00" ) = duration( "P2DT20H14M" )
+		duration( "P2Y2M" ) = duration( "P26M" )
+	Syntax: years and months duration( from, to )
+		years and months duration( date( "2011-12-22" ), date( "2013-08-24" ) ) = duration( "P1Y8M" )
+
+Boolean functions: 
+	Syntax: not( negand )
+		not(true) = false
+		not(false) = true
+
+String functions:
+	Syntax: substring( string, start position, length? )
+		substring( "testing",3 ) = "sting"
+		substring( "testing",3,3 ) = "sti"
+		substring( "testing", -2, 1 ) = "n"
+		substring( "\U01F40Eab", 2 ) = "ab"     here \U01F40E is harse symbol
+	Syntax: string length( string )
+		string length( "tes" ) = 3
+		string length( "\U01F40Eab" ) = 3
+	Syntax: upper case( string )
+		upper case( "aBc4" ) = "ABC4"
+	Syntax: lower case( string )
+		lower case( "aBc4" ) = "abc4"
+	Syntax: substring before( string, match )
+		substring before( "testing", "ing" ) = "test"
+		substring before( "testing", "xyz" ) = ""
+	Syntax:	substring after( string, match )
+		substring after( "testing", "test" ) = "ing"
+		substring after( "", "a" ) = ""
+	Syntax: replace( input, pattern, replacement, flags? )
+		replace( "abcd", "(ab)|(a)", "[1=$1][2=$2]" ) = "[1=ab][2=]cd"
+	Syntax: contains( string, match )
+		contains( "testing", "to" ) = false
+		contains( "testing", "sti" ) = true
+	Syntax: starts with( string, match )
+		starts with( "testing", "te" ) = true
+	Syntax: ends with( string, match )
+		ends with( "testing", "g" ) = true
+	Syntax:  matches( input, pattern, flags? )
+		matches( "teeesting", "^te*sting" ) = true
+	Syntax: split( string, delimiter )
+		split( "John Doe", "\\s" ) = ["John", "Doe"]
+		split( "a;b;c;;", ";" ) = ["a","b","c","",""]
+		
+List functions:
+	Syntax: list contains( list, element )
+		list contains( [1,2,3], 2 ) = true
+	Syntax: count( list )
+		count( [1,2,3] ) = 3
+		count( [] ) = 0
+		count( [1,[2,3]] ) = 2
+	Syntax: min( list )
+		min( e1, e2, ..., eN )
+	Syntax: max( list )
+		max( e1, e2, ..., eN )
+	Syntax: sum( list )  or sum( n1, n2, n3 .... n)
+		sum( [1,2,3] ) = 6
+		sum( 1,2,3 ) = 6
+		sum( 1 ) = 1
+		sum( [] ) = null
+	Syntax: product( list ) or product( n1, n2, ... n)
+		product( [2, 3, 4] ) = 24
+		product( 2, 3, 4 ) = 24
+	Syntax: mean( list ) : Calculates the average (arithmetic mean) of the elements in the list.
+		mean( [1,2,3] ) = 2
+		mean( 1,2,3 ) = 2
+		mean( 1 ) = 1
+		mean( [] ) = null
+	Syntax: median( list ) or median( n1, n2, ..., nN )
+		median( 8, 2, 5, 3, 4 ) = 4
+		median( [6, 1, 2, 3] ) = 2.5
+		median( [ ] ) = null
+	Syntax: stddev( list ) Returns the standard deviation of the numbers in the list.
+		stddev( 2, 4, 7, 5 ) = 2.081665999466132735282297706979931
+		stddev( [47] ) = null
+		stddev( 47 ) = null
+		stddev( [ ] ) = null
+	Syntax: mode( list )
+		mode( 6, 3, 9, 6, 6 ) = [6]
+		mode( [6, 1, 9, 6, 1] ) = [1, 6]
+		mode( [ ] ) = [ ]
+	Syntax: all( list ) or all( b1, b2, ..., bN ): Returns true if all elements in the list are true.
+		all( [false,null,true] ) = false
+		all( true ) = true
+		all( [true] ) = true
+		all( [] ) = true
+		all( 0 ) = null
+	Syntax: any( list ) or any( b1, b2, ..., bN ): Returns true if any element in the list is true.
+		any( [false,null,true] ) = true
+		any( false ) = false
+		any( [] ) = false
+		any( 0 ) = null
+	Syntax: sublist( list, start position, length? )
+		sublist( [4,5,6], 1, 2 ) = [4,5]
+	Syntax: append( list, item )
+		append( [1], 2, 3 ) = [1,2,3]
+	Syntax: concatenate( list )
+		concatenate( [1,2],[3] ) = [1,2,3]
+	Syntax: insert before( list, position, newItem )
+		insert before( [1,3],1,2 ) = [2,1,3]
+	Syntax: remove( list, position )
+		remove( [1,2,3], 2 ) = [1,3]
+	Syntax: reverse( list )
+		reverse( [1,2,3] ) = [3,2,1]
+	Syntax: index of( list, match )
+		index of( [1,2,3,2],2 ) = [2,4]
+	Syntax: union( list )
+		union( [1,2],[2,3] ) = [1,2,3]
+	Syntax: distinct values( list )
+		distinct values( [1,2,3,2,1] ) = [1,2,3]
+	Syntax: flatten( list )
+		flatten( [[1,2],[[3]], 4] ) = [1,2,3,4]
+Number function:
+	Syntax: decimal( n, scale )
+		decimal( 1/3, 2 ) = .33
+		decimal( 1.5, 0 ) = 2
+		decimal( 2.5, 0 ) = 3
+		decimal( 1.035, 2 ) = 1.04
+		decimal( 1.045, 2 ) = 1.04
+		decimal( 1.055, 2 ) = 1.06
+		decimal( 1.065, 2 ) = 1.06
+	Syntax: floor( n )
+		floor( 1.5 ) = 1
+		floor( -1.5 ) = -2
+	Syntax: ceiling( n )
+		ceiling( 1.5 ) = 2
+		ceiling( -1.5 ) = -1
+	Syntax: abs( n )
+		abs( 10 ) = 10
+		abs( -10 ) = 10
+		abs( @"PT5H" ) = @"PT5H"
+		abs( @"-PT5H" ) = @"PT5H"
+	Syntax: modulo( dividend, divisor )
+		modulo( 12, 5 ) = 2
+		modulo( -12,5 )= 3
+		modulo( 12,-5 )= -3
+		modulo( -12,-5 )= -2
+		modulo( 10.1, 4.5 )= 1.1
+		modulo( -10.1, 4.5 )= 3.4
+		modulo( 10.1, -4.5 )= -3.4
+		modulo( -10.1, -4.5 )= -1.1
+	Syntax: sqrt( number )
+		sqrt( 16 ) = 4
+	Syntax: log( number )
+		decimal( log( 10 ), 2 ) = 2.30
+	Syntax: exp( number ) Returns Euler’s number e raised to the power of the specified number.
+		decimal( exp( 5 ), 2 ) = 148.41
+	Syntax: odd( number )
+		odd( 5 ) = true
+		odd( 2 ) = false
+	Syntax: even( number )
+		even( 5 ) = false
+		even ( 2 ) = true
+Date and time functions:
+	Syntax: is( value1, value2 )
+		is( date( "2012-12-25" ), time( "23:00:50" ) ) = false
+		is( date( "2012-12-25" ), date( "2012-12-25" ) ) = true
+		is( time( "23:00:50z" ), time( "23:00:50" ) ) = false
+Range functions:
+	Syntax: before( point1 point2 ) ----> point1 < point2
+			before( point range ) ---> point < range.start or ( point = range.start and not(range.start included) )
+			before( range point ) ---> range.end < point or ( range.end = point and not(range.end included) )
+			before( range1,range2 ) ---> range1.end < range2.start or (( not(range1.end included) or not(range2.start included) ) and range1.end = range2.start )
+		before( 1, 10 ) = true
+		before( 10, 1 ) = false
+		before( 1, [1..10] ) = false
+		before( 1, (1..10] ) = true
+		before( 1, [5..10] ) = true
+		before( [1..10], 10 ) = false
+		before( [1..10), 10 ) = true
+		before( [1..10], 15 ) = true
+		before( [1..10], [15..20] ) = true
+		before( [1..10], [10..20] ) = false
+		before( [1..10), [10..20] ) = true
+		before( [1..10], (10..20] ) = true
+   * [1..5] ---> [1,2,3,4,5]
+   * [1..5) ---> [1,2,3,4]
+   * (1..5] ---> [2,3,4,5]
+   * (1..5) ---> [2,3,4]
+	Syntax: after( )
+			after( point1 point2 )
+			after( point range )
+			after( range, point )
+			after( range1 range2 )
+		after( 10, 5 ) = true
+		after( 5, 10 ) = false
+		after( 12, [1..10] ) = true
+		after( 10, [1..10) ) = true
+		after( 10, [1..10] ) = false
+		after( [11..20], 12 ) = false
+		after( [11..20], 10 ) = true
+		after( (11..20], 11 ) = true
+		after( [11..20], 11 ) = false
+		after( [11..20], [1..10] ) = true
+		after( [1..10], [11..20] ) = false
+		after( [11..20], [1..11) ) = true
+		after( (11..20], [1..11] ) = true
+	Syntax: meets( )
+		meets( [1..5], [5..10] ) = true
+		meets( [1..5), [5..10] ) = false
+		meets( [1..5], (5..10] ) = false
+		meets( [1..5], [6..10] ) = false		
+	Syntax: met by( )
+		met by( [5..10], [1..5] ) = true
+		met by( [5..10], [1..5) ) = false
+		met by( (5..10], [1..5] ) = false
+		met by( [6..10], [1..5] ) = false
+	Syntax: overlaps( )
+		overlaps( [1..5], [3..8] ) = true
+		overlaps( [3..8], [1..5] ) = true
+		overlaps( [1..8], [3..5] ) = true
+		overlaps( [3..5], [1..8] ) = true
+		overlaps( [1..5], [6..8] ) = false
+		overlaps( [6..8], [1..5] ) = false
+		overlaps( [1..5], [5..8] ) = true
+		overlaps( [1..5], (5..8] ) = false
+		overlaps( [1..5), [5..8] ) = false
+		overlaps( [1..5), (5..8] ) = false
+		overlaps( [5..8], [1..5] ) = true
+		overlaps( (5..8], [1..5] ) = false
+		overlaps( [5..8], [1..5) ) = false
+		overlaps( (5..8], [1..5) ) = false
+	Syntax: overlaps before( )
+	Syntax: overlaps after( )
+	Syntax: finishes( )
+	Syntax: finished by( )
+	Syntax: includes( )
+	Syntax: during( )
+	Syntax: starts( )
+	Syntax: started by( )
+	Syntax: coincides( )
+Temporal functions
+	Syntax: day of year( date )	
+		day of year( date(2019, 9, 17) ) = 260
+	Syntax: day of week( date )
+		day of week( date(2019, 9, 17) ) = "Tuesday"
+	Syntax: month of year( date )
+		month of year( date(2019, 9, 17) ) = "September"
+	Syntax: week of year( date )
+		week of year( date(2019, 9, 17) ) = 38
+		week of year( date(2003, 12, 29) ) = 1
+		week of year( date(2004, 1, 4) ) = 1
+		week of year( date(2005, 1, 1) ) = 53
+		week of year( date(2005, 1, 3) ) = 1
+		week of year( date(2005, 1, 9) ) = 1
+Sort functions
+	Syntax: sort( list, precedes )
+		sort( list: [3,1,4,5,2], precedes: function(x,y) x < y ) = [1,2,3,4,5]
+		sort( list: [3,1,4,5,2], precedes: function(x,y) x > y ) = [1,2,3,4,5]
+Context functions
+	Syntax: get value( m, key )
+		get value( {key1 : "value1"}, "key1" ) = "value1"
+		get value( {key1 : "value1"}, "unexistent-key" ) = null
+	Syntax: get entries( m )
+		get entries( {key1 : "value1", key2 : "value2"} ) = 
+					[ { key : "key1", value : "value1" }, {key : "key2", value : "value2"} ]
+
+
+Variable and function names in FEEL:
+===================================
+	Friendly Enough Expression Language (FEEL) supports spaces and a few special characters as part of variable and function names. 
+	A FEEL name must start with a letter, ?, or _ element.
+	Variable names cannot start with a language keyword, such as and, true,in, for, some and every.
+	The remaining characters in a variable name can be any of the starting characters, as well as digits, white spaces, and special characters such as +, -, /, *, ', and ..
+	Ex: Valid variable names 
+		age, Age, Birth Date, Flight 234 pre-check procedure
+	
+	The DMN specification limits the use of spaces in FEEL names.
+	According to the DMN specification, names can contain multiple spaces but not two consecutive spaces.
+	Red Hat Decision Manager removes the limitation on the use of consecutive spaces. Red Hat Decision Manager supports variable names with any number of consecutive spaces, but normalizes them into a single space.
+DMN decision logic in boxed expressions: 
+	Decision tables
+	Literal expressions
+	Contexts
+	Relations
+	Functions
+	Invocations
+	Lists
+DMN decision tables
+	A decision table in DMN is a visual representation of one or more business rules in a tabular format.
+	Decision tables are a popular way of modeling rules and decision logic, and are used in many methodologies (such as DMN) and implementation frameworks (such as Drools).
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\DecisionTable_1.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\DecisionTable_2.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\DecisionTable_3.PNG
+
+	Hit policies in DMN decision tables:
+		Hit policies determine how to reach an outcome when multiple rules in a decision table match the provided input values.
+		Unique (U): Permits only one rule to match. Any overlap raises an error.
+		Any (A): Permits multiple rules to match, but they must all have the same output. If multiple matching rules do not have the same output, an error is raised.
+		Priority (P): Permits multiple rules to match, with different outputs. The output that comes first in the output values list is selected.
+		First (F): Uses the first match in rule order.
+		Collect (C+, C>, C<, C#): Aggregates output from multiple rules based on an aggregation function.
+			Collect ( C ): Aggregates values in an arbitrary list.
+			Collect Sum (C+): Outputs the sum of all collected values. Values must be numeric.
+			Collect Min (C<): Outputs the minimum value among the matches. The resulting values must be comparable, such as numbers, dates, or text (lexicographic order).
+			Collect Max (C>): Outputs the maximum value among the matches. The resulting values must be comparable, such as numbers, dates or text (lexicographic order).
+			Collect Count (C#): Outputs the number of matching rules.
+
+Boxed literal expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_Literal_1.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\Boxed_Literal_2.PNG
+	A boxed literal expression in DMN is a literal FEEL expression as text in a table cell, typically with a labeled column and an assigned data type. 
+
+Boxed context expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_Context_Expression_1.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\Boxed_Context_Expression_2.PNG
+	A boxed context expression in DMN is a set of variable names and values with a result value.
+	Each name-value pair is a context entry.
+	You use context expressions to represent data definitions in decision logic and set a value for a desired decision element within the DMN decision model.
+	A value in a boxed context expression can be a data type value or FEEL expression, or can contain a nested sub-expression of any type, such as a decision table, a literal expression, or another context expression.
+
+Boxed relation expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_Relation_Expression_1.PNG
+	A boxed relation expression in DMN is a traditional data table with information about given entities, listed as rows.
+	You use boxed relation tables to define decision data for relevant entities in a decision at a particular node. 
+	Boxed relation expressions are similar to context expressions in that they set variable names and values, but relation expressions contain no result value and list all variable values based on a single defined variable in each column.
+
+	
+Boxed function expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_Function_Expression_1.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\Boxed_Function_Expression_2.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\Boxed_Function_Expression_3.PNG
+
+	A boxed function expression in DMN is a parameterized boxed expression containing a literal FEEL expression, a nested context expression of an external JAVA or PMML function, or a nested boxed expression of any type.
+	By default, all business knowledge models are defined as boxed function expressions.
+	You use boxed function expressions to call functions on your decision logic and to define all business knowledge models.
+Boxed invocation expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_Invocation_Expression_1.PNG
+		 D:\codebase\git\rhpam_rhdm\imgs\Boxed_Invocation_Expression_1.PNG
+	A boxed invocation expression in DMN is a boxed expression that invokes a business knowledge model. A boxed invocation expression contains the name of the business knowledge model to be invoked and a list of parameter bindings.
+	Each binding is represented by two boxed expressions on a row: The box on the left contains the name of a parameter and the box on the right contains the binding expression whose value is assigned to the parameter to evaluate the invoked business knowledge model. You use boxed invocations to invoke at a particular decision node a business knowledge model defined in the decision model.
+
+Boxed list expressions
+	Ref: D:\codebase\git\rhpam_rhdm\imgs\Boxed_List_Expression_1.PNG
+	A boxed list expression in DMN represents a FEEL list of items. You use boxed lists to define lists of relevant items for a particular node in a decision. You can also use literal FEEL expressions for list items in cells to create more complex lists.
+
+
+
+
+
+
